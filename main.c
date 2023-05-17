@@ -17,6 +17,14 @@ typedef struct NodeList {
     struct NodeList* next;
 } NodeList;
 
+void print_node_list(NodeList* list) {
+    if (list == NULL) {
+        return;
+    }
+    printf("%s ", list->node->name);
+    print_node_list(list->next);
+}
+
 Node* createNode(const char* name) {
     Node* node = (Node*)malloc(sizeof(Node));
     strcpy(node->name, name);
@@ -45,28 +53,48 @@ Node* findFile(Node* node, char* name) {
 
 // Change directory to the specified directory among nodelist
 
-void add_to_node_list(NodeList* list, Node* node) {
-    printf("Adding %s to nodelist\n", node->name);
-    if (list->node == NULL) {
-        printf("liste nulle\n");
-        list->node = node;
-        list->next = NULL;
-    } 
-    // if (list->next == NULL) {
-    //     list->next = (NodeList*)malloc(sizeof(NodeList));
-    //     list->next->node = node;
-    //     list->next->next = NULL;
-    // } else {
-    //     // add_to_node_list(list->next, node);
-    // }
+void add_to_node_list(NodeList** list, Node* node) {
+    if (*list == NULL) {
+        *list = (NodeList*)malloc(sizeof(NodeList));
+        (*list)->node = node;
+        (*list)->next = NULL;
+        return;
+    }else{
+        NodeList* current = *list;
+        while(current->next != NULL) {
+            current = current->next;
+        }
+        current->next = (NodeList*)malloc(sizeof(NodeList));
+        current->next->node = node;
+        current->next->next = NULL;
+    }
 }
 
-// Create file
+void delete_file(Node* current_directory, char* name) {
+    if (current_directory->children == NULL) {
+        return;
+    }
+    NodeList* current = current_directory->children;
+    NodeList* previous = NULL;
+    while(current != NULL) {
+        if(strcmp(current->node->name, name) == 0) {
+            if (previous == NULL) {
+                current_directory->children = current->next;
+            }else{
+                previous->next = current->next;
+            }
+            free(current);
+            return;
+        }
+        previous = current;
+        current = current->next;
+    }
+}
+
 void create_file(Node* current_directory, char* name){
     Node* new_file = createNode(name);
     new_file->parent = current_directory;
-    printf("1Adding %s to %s\n", new_file->name, current_directory->name);
-    add_to_node_list(current_directory->children, new_file);    
+    add_to_node_list(&current_directory->children, new_file);    
 }
 
 char* fullPath(Node* node, char* path) {
@@ -87,14 +115,11 @@ char* fullPath(Node* node, char* path) {
 
 void list_directory(Node* current_directory) {
     if (current_directory->children == NULL) {
-        printf("\n");
+        printf("vide\n");
         return;
     }
     NodeList* current = current_directory->children;
-    while (current != NULL) {
-        printf("%s ", current->node->name);
-        current = current->next;
-    }
+    print_node_list(current);
     printf("\n");
 }
 
@@ -103,10 +128,12 @@ int main() {
     Node* root = createNode("Root");
     Node* current_directory = root;
     create_file(current_directory, "file1");
-    // create_file(current_directory, "file2");
+    create_file(current_directory, "file2");
 
-    // list_directory(current_directory);
-
+    list_directory(current_directory);
+    printf("\n\n\n");
+    delete_file(current_directory, "file1");
+    list_directory(current_directory);
 
     
     printf("\n\n\n");

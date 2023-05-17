@@ -31,4 +31,4 @@ clean:
 c:
 	rm -fv bin $(BIN).tab.h $(BIN).tab.c lex.yy.c *.o lex.backup $(BIN).dot $(BIN).png $(BIN).output $(BIN).vcg $(BIN).gv
 	gcc *.c && ./a.out
-	rm -fv a.out
+	rm a.out
