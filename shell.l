@@ -1,12 +1,14 @@
 %{
   #include "shell.tab.h"
   #include <stdlib.h>
+  #include <stdio.h>
 %}
 
 
 %option noyywrap
 %%
 
+"\n" { return EOL; }
 ^#[^\n]* { return COMMENT; }
 
 ls { return LS; }
@@ -19,9 +21,7 @@ mkdir { return MKDIR; }
 rmdir { return RMDIR; }
 cd { return CD; }
 pwd { return PWD; }
-ln { return LN; }
 
 [a-zA-Z0-9_\-\.]+ { yylval.str = strdup(yytext); return FILENAME; }
-"\n" { return EOL; }
 
 . { /* On ignore */ }
