@@ -1,0 +1,190 @@
+Terminals unused in grammar
+
+    CAT
+    RM
+    TOUCH
+    CP
+    MV
+    RMDIR
+
+
+Grammar
+
+    0 $accept: S $end
+
+    1 S: Token
+    2  | S Token
+
+    3 Token: error EOL
+    4      | EOL
+    5      | COMMENT
+    6      | LS
+    7      | PWD
+    8      | MKDIR FILENAME
+    9      | CD FILENAME
+   10      | TEST
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256) 3
+    LS (258) 6
+    CAT (259)
+    RM (260)
+    TOUCH (261)
+    CP (262)
+    MV (263)
+    MKDIR (264) 8
+    RMDIR (265)
+    CD (266) 9
+    PWD (267) 7
+    TEST (268) 10
+    COMMENT (269) 5
+    FILENAME <str> (270) 8 9
+    EOL (271) 3 4
+
+
+Nonterminals, with rules where they appear
+
+    $accept (17)
+        on left: 0
+    S (18)
+        on left: 1 2
+        on right: 0 2
+    Token (19)
+        on left: 3 4 5 6 7 8 9 10
+        on right: 1 2
+
+
+State 0
+
+    0 $accept: • S $end
+
+    error    shift, and go to state 1
+    LS       shift, and go to state 2
+    MKDIR    shift, and go to state 3
+    CD       shift, and go to state 4
+    PWD      shift, and go to state 5
+    TEST     shift, and go to state 6
+    COMMENT  shift, and go to state 7
+    EOL      shift, and go to state 8
+
+    S      go to state 9
+    Token  go to state 10
+
+
+State 1
+
+    3 Token: error • EOL
+
+    EOL  shift, and go to state 11
+
+
+State 2
+
+    6 Token: LS •
+
+    $default  reduce using rule 6 (Token)
+
+
+State 3
+
+    8 Token: MKDIR • FILENAME
+
+    FILENAME  shift, and go to state 12
+
+
+State 4
+
+    9 Token: CD • FILENAME
+
+    FILENAME  shift, and go to state 13
+
+
+State 5
+
+    7 Token: PWD •
+
+    $default  reduce using rule 7 (Token)
+
+
+State 6
+
+   10 Token: TEST •
+
+    $default  reduce using rule 10 (Token)
+
+
+State 7
+
+    5 Token: COMMENT •
+
+    $default  reduce using rule 5 (Token)
+
+
+State 8
+
+    4 Token: EOL •
+
+    $default  reduce using rule 4 (Token)
+
+
+State 9
+
+    0 $accept: S • $end
+    2 S: S • Token
+
+    $end     shift, and go to state 14
+    error    shift, and go to state 1
+    LS       shift, and go to state 2
+    MKDIR    shift, and go to state 3
+    CD       shift, and go to state 4
+    PWD      shift, and go to state 5
+    TEST     shift, and go to state 6
+    COMMENT  shift, and go to state 7
+    EOL      shift, and go to state 8
+
+    Token  go to state 15
+
+
+State 10
+
+    1 S: Token •
+
+    $default  reduce using rule 1 (S)
+
+
+State 11
+
+    3 Token: error EOL •
+
+    $default  reduce using rule 3 (Token)
+
+
+State 12
+
+    8 Token: MKDIR FILENAME •
+
+    $default  reduce using rule 8 (Token)
+
+
+State 13
+
+    9 Token: CD FILENAME •
+
+    $default  reduce using rule 9 (Token)
+
+
+State 14
+
+    0 $accept: S $end •
+
+    $default  accept
+
+
+State 15
+
+    2 S: S Token •
+
+    $default  reduce using rule 2 (S)

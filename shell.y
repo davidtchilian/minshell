@@ -5,13 +5,12 @@
 #include "functions.h"
 
 extern FILE *yyin;
-void yyerror(char*);
+extern int yylineno;
+extern char* yytext;
+void yyerror(char* s);
 int yylex();
 int yyparse();
-int lineno = 1;
-int usingfile = 0;
 Node* current_directory;
-
 
 %}
 
@@ -20,9 +19,9 @@ Node* current_directory;
     char* str;
 }
 
-%token LS CAT RM TOUCH CP MV MKDIR RMDIR CD PWD
+%token LS CAT RM TOUCH CP MV MKDIR RMDIR CD PWD TEST COMMENT
 %token <str> FILENAME
-%token <str> COMMENT
+
 %token EOL
 
 %start S
@@ -34,22 +33,17 @@ S:
     ;
 
 Token: 
-    error EOL                                                   { lineno++; if (yyin == stdin) { printf("shell> "); } }
-    | EOL                                                       { lineno++; if (yyin == stdin) { printf("shell> "); } }
+    error EOL                                                   { if (yyin == stdin) { printf("shell> "); } }
+    | EOL                                                       { if (yyin == stdin) { printf("shell> "); } }
     | COMMENT                                                   { }
     | LS                                                        { 
         list_directory(current_directory);
     }
     | PWD                                                       {
-        printf("pwd detected !\n");
         if (current_directory == NULL) {
             printf("current directory is null\n");
             exit(1);
         }
-        if (current_directory->parent == NULL) {
-            printf("parent is null in pwd call\n");
-        }
-        printf("really not null ?\n");
         printf("%s\n", get_pwd(current_directory));
     }
     | MKDIR FILENAME                                            { 
@@ -58,25 +52,33 @@ Token:
     | CD FILENAME                                               { 
         change_directory(&current_directory, $2);
     }
+    | TEST                                                      {
+        printf("test detected !\n");
+        // printf("%s\n", stringtest);
+    }
     ;
 %%
 
 void yyerror(char *s) {
-    if (yyin != stdin) {
+    /* if (yyin != stdin) {
         fprintf(stderr, "\033[1;31m%s\n\033[0m", s);
         exit(1);
     }
     else {
         fprintf(stderr, "\033[1;31m%s\n\033[0m", s);
-    }
+    } */
+    fprintf(stderr, "Syntax error at line %d: %s\n", yylineno, yytext);
+
 }
 
 int main(int argc, char const *argv[]){
     char* str = malloc(100*sizeof(char));
-    Node current_directory;
-    strcpy(current_directory.name, "/");
-    current_directory.parent = NULL;
-    current_directory.children = NULL;
+    current_directory = (Node*) malloc(sizeof(Node));
+    strcpy(current_directory->name, "/");
+    current_directory->parent = NULL;
+    current_directory->children = NULL;
+
+
     if (argc > 1) {
         FILE *f = fopen(argv[1], "r");
         if (!f) {

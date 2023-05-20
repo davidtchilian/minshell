@@ -74,16 +74,12 @@ void create_file(Node* current_directory, char* name){
 }
 
 char* fullPath(Node* node, char* path) {
-    printf("path: %s\n", path);
     if (node->parent == NULL) {
-        printf("debug\n");
         if (strcmp(path, "") == 0) {
-            printf("root\n");
             return "/";
         }
         return path;
     }
-    printf("debug2\n");
     char* temp = (char*)malloc(sizeof(char) * 300);
     
     strcat(temp, "/");
