@@ -11,6 +11,7 @@ void yyerror(char* s);
 int yylex();
 int yyparse();
 Node* current_directory;
+int using_ps1 = 0;
 
 %}
 
@@ -19,7 +20,7 @@ Node* current_directory;
     char* str;
 }
 
-%token LS CAT RM TOUCH CP MV MKDIR RMDIR CD PWD TEST COMMENT
+%token LS CAT RM TOUCH CP MV MKDIR RMDIR CD PWD TEST COMMENT EXIT ECHO_COMMAND TEXT SET PS1
 %token <str> FILENAME
 
 %token EOL
@@ -33,8 +34,8 @@ S:
     ;
 
 Token: 
-    error EOL                                                   { if (yyin == stdin) { printf("shell> "); } }
-    | EOL                                                       { if (yyin == stdin) { printf("shell> "); } }
+    error EOL                                                   { ps1(current_directory, yyin == stdin, using_ps1); }
+    | EOL                                                       { ps1(current_directory, yyin == stdin, using_ps1); }
     | COMMENT                                                   { }
     | LS                                                        { 
         list_directory(current_directory);
@@ -47,37 +48,37 @@ Token:
         printf("%s\n", get_pwd(current_directory));
     }
     | MKDIR FILENAME                                            { 
-        create_file(current_directory, $2);
+        create_file(current_directory, $2, DIR);
     }
     | CD FILENAME                                               { 
         change_directory(&current_directory, $2);
     }
-    | TEST                                                      {
-        printf("test detected !\n");
-        // printf("%s\n", stringtest);
+    | TOUCH FILENAME                                            { 
+        create_file(current_directory, $2, FIL);
+    }
+    | RM FILENAME                                               { 
+        delete_file(current_directory, $2);
+    }
+    | RMDIR FILENAME                                            { 
+        delete_directory(current_directory, $2);
+    }
+    | SET SET_OPTION                                            { }
+    ;
+
+SET_OPTION:
+    | PS1                                                       { 
+        using_ps1 = !using_ps1;
     }
     ;
 %%
 
 void yyerror(char *s) {
-    /* if (yyin != stdin) {
-        fprintf(stderr, "\033[1;31m%s\n\033[0m", s);
-        exit(1);
-    }
-    else {
-        fprintf(stderr, "\033[1;31m%s\n\033[0m", s);
-    } */
     fprintf(stderr, "Syntax error at line %d: %s\n", yylineno, yytext);
-
 }
 
 int main(int argc, char const *argv[]){
     char* str = malloc(100*sizeof(char));
-    current_directory = (Node*) malloc(sizeof(Node));
-    strcpy(current_directory->name, "/");
-    current_directory->parent = NULL;
-    current_directory->children = NULL;
-
+    current_directory = create_node("root", DIR);
 
     if (argc > 1) {
         FILE *f = fopen(argv[1], "r");
@@ -88,7 +89,7 @@ int main(int argc, char const *argv[]){
         yyin = f;
     }else{
         yyin = stdin;
-        printf("shell> ");
+        printf("minshell> ");
     }
     
     yyparse();
